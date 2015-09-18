@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -32,8 +31,21 @@ func LibrariesHandler(db *sql.DB) httprouter.Handle {
 	}
 }
 
-func LibraryHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	libraryID := ps.ByName("libraryID")
+func LibraryHandler(db *sql.DB) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		libraryID := ps.ByName("id")
 
-	fmt.Fprintln(w, "Library show:", libraryID)
+		library := Library{}
+		err := db.QueryRow("SELECT id, name, taken_places, total_places FROM libraries WHERE id = $1", libraryID).
+			Scan(&library.ID, &library.Name, &library.TakenPlaces, &library.TotalPlaces)
+
+		switch {
+		case err == sql.ErrNoRows:
+			log.Printf("No library with that ID. TODO: 404")
+		case err != nil:
+			log.Fatal(err)
+		default:
+			json.NewEncoder(w).Encode(library)
+		}
+	}
 }

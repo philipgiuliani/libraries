@@ -25,7 +25,7 @@ func main() {
 	// routes
 	router := httprouter.New()
 	router.GET("/libraries", LibrariesHandler(db))
-	router.GET("/libraries/:libraryID", LibraryHandler)
+	router.GET("/libraries/:id", LibraryHandler(db))
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
