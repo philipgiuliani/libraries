@@ -3,10 +3,9 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"github.com/julienschmidt/httprouter"
 	"log"
 	"net/http"
-
-	"github.com/julienschmidt/httprouter"
 )
 
 func LibrariesHandler(db *sql.DB) httprouter.Handle {
@@ -41,7 +40,7 @@ func LibraryHandler(db *sql.DB) httprouter.Handle {
 
 		switch {
 		case err == sql.ErrNoRows:
-			log.Printf("No library with that ID. TODO: 404")
+			http.NotFound(w, r)
 		case err != nil:
 			log.Fatal(err)
 		default:
