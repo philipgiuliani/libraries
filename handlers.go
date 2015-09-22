@@ -9,7 +9,7 @@ import (
 )
 
 func LibrariesHandler(db *sql.DB) httprouter.Handle {
-	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		rows, err := db.Query("SELECT id, name, taken_places, total_places FROM libraries")
 		if err != nil {
 			log.Fatal(err)
