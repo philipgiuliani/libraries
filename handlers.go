@@ -24,7 +24,12 @@ func LibrariesHandler(db *sql.DB) httprouter.Handle {
 		var rows *sql.Rows
 		var err error
 		if latitude != 0 && longitude != 0 {
-			rows, err = db.Query("SELECT id, name, taken_places, total_places, earth_distance(ll_to_earth(latitude, longitude), ll_to_earth($1, $2)) AS distance FROM libraries ORDER BY distance ASC", latitude, longitude)
+			const query = `
+				SELECT id, name, taken_places, total_places, earth_distance(ll_to_earth(latitude, longitude), ll_to_earth($1, $2)) AS distance
+				FROM libraries
+				ORDER BY distance ASC
+			`
+			rows, err = db.Query(query, latitude, longitude)
 		} else {
 			rows, err = db.Query("SELECT id, name, taken_places, total_places FROM libraries")
 		}
@@ -50,11 +55,8 @@ func LibrariesHandler(db *sql.DB) httprouter.Handle {
 
 func LibraryHandler(db *sql.DB) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-		libraryID := ps.ByName("id")
-
-		library := Library{}
-		err := db.QueryRow("SELECT id, name, taken_places, total_places, latitude, longitude, description, city, country_code, contact FROM libraries WHERE id = $1", libraryID).
-			Scan(&library.ID, &library.Name, &library.TakenPlaces, &library.TotalPlaces, &library.Latitude, &library.Longitude, &library.Description, &library.City, &library.CountryCode, &library.Contact)
+		libraryID, _ := strconv.Atoi(ps.ByName("id"))
+		library, err := getLibraryByID(db, libraryID)
 
 		switch {
 		case err == sql.ErrNoRows:
@@ -65,4 +67,17 @@ func LibraryHandler(db *sql.DB) httprouter.Handle {
 			json.NewEncoder(w).Encode(library)
 		}
 	}
+}
+
+func getLibraryByID(db *sql.DB, id int) (*Library, error) {
+	const query = `
+		SELECT id, name, taken_places, total_places, latitude, longitude, description, city, country_code, contact
+		FROM libraries WHERE id = $1
+	`
+
+	library := Library{}
+	err := db.QueryRow(query, id).
+		Scan(&library.ID, &library.Name, &library.TakenPlaces, &library.TotalPlaces, &library.Latitude, &library.Longitude, &library.Description, &library.City, &library.CountryCode, &library.Contact)
+
+	return &library, err
 }
