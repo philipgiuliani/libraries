@@ -24,11 +24,7 @@ func LibrariesHandler(db *sql.DB) httprouter.Handle {
 		var rows *sql.Rows
 		var err error
 		if latitude != 0 && longitude != 0 {
-			rows, err = db.Query(`
-					SELECT id, name, taken_places, total_places, earth_distance(ll_to_earth(latitude, longitude), ll_to_earth($1, $2)) AS distance
-					FROM libraries
-					ORDER BY distance ASC`,
-				latitude, longitude)
+			rows, err = db.Query("SELECT id, name, taken_places, total_places, earth_distance(ll_to_earth(latitude, longitude), ll_to_earth($1, $2)) AS distance FROM libraries ORDER BY distance ASC", latitude, longitude)
 		} else {
 			rows, err = db.Query("SELECT id, name, taken_places, total_places FROM libraries")
 		}
