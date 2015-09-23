@@ -12,12 +12,12 @@ import (
 func LibrariesHandler(db *sql.DB) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		queryParams := r.URL.Query()
-		latitude, _ := strconv.ParseFloat(queryParams.Get("latitude"), 32)
-		longitude, _ := strconv.ParseFloat(queryParams.Get("longitude"), 32)
+		latitude, errLat := strconv.ParseFloat(queryParams.Get("latitude"), 32)
+		longitude, errLng := strconv.ParseFloat(queryParams.Get("longitude"), 32)
 
 		var libraries *Libraries
 		var err error
-		if latitude != 0 && longitude != 0 {
+		if errLat == nil && errLng == nil {
 			libraries, err = getLibrariesByLocation(db, latitude, longitude)
 		} else {
 			libraries, err = getLibraries(db)
