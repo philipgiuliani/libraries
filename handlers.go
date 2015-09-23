@@ -12,14 +12,8 @@ import (
 func LibrariesHandler(db *sql.DB) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		queryParams := r.URL.Query()
-
-		// parse location
-		var latitude float64
-		var longitude float64
-		if queryParams.Get("latitude") != "" && queryParams.Get("longitude") != "" {
-			latitude, _ = strconv.ParseFloat(queryParams.Get("latitude"), 32)
-			longitude, _ = strconv.ParseFloat(queryParams.Get("longitude"), 32)
-		}
+		latitude, _ := strconv.ParseFloat(queryParams.Get("latitude"), 32)
+		longitude, _ := strconv.ParseFloat(queryParams.Get("longitude"), 32)
 
 		var libraries *Libraries
 		var err error
