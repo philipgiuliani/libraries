@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"log"
-	"encoding/json"
+	"github.com/jeffail/gabs"
+	"io/ioutil"
 )
 
 type Parser struct {
@@ -21,10 +22,13 @@ var univeParser = &Parser{
 		}
 		defer res.Body.Close()
 
-		var f interface{}
-		json.NewDecoder(res.Body).Decode(f)
+		body, _ := ioutil.ReadAll(res.Body)
+		json, _ := gabs.ParseJSON(body)
+		children, _ := json.ChildrenMap()
 
-		fmt.Println(f)
+		for key, child := range children {
+			fmt.Printf("Key: %v, Value: %v\n", key, child.Data())
+		}
 	},
 }
 
