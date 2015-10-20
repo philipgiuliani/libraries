@@ -1,16 +1,16 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"log"
 	"github.com/jeffail/gabs"
 	"io/ioutil"
+	"strconv"
 )
 
 type ParserUnive struct {}
 
-func (*ParserUnive) Parse() (interface{}, error) {
+func (*ParserUnive) Parse() ([]Library, error) {
 	url := "http://static.unive.it/sitows/index/personebiblioteche"
 
 	res, err := http.Get(url)
@@ -23,9 +23,18 @@ func (*ParserUnive) Parse() (interface{}, error) {
 	json, _ := gabs.ParseJSON(body)
 	children, _ := json.ChildrenMap()
 
+	libraries := []Library{}
 	for key, child := range children {
-		fmt.Printf("Key: %v, Value: %v\n", key, child.Data())
+		takenPlaces, _ := strconv.Atoi(child.Search("persone").Data().(string))
+		totalPlaces, _ := strconv.Atoi(child.Search("max").Data().(string))
+
+		library := Library {
+			MappingID: key,
+			TakenPlaces: takenPlaces,
+			TotalPlaces: totalPlaces,
+		}
+		libraries = append(libraries, library)
 	}
 
-	return nil, nil
+	return libraries, nil
 }

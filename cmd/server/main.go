@@ -9,6 +9,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/philipgiuliani/libraries/db"
 )
 
 func main() {
@@ -16,16 +18,16 @@ func main() {
 	dbinfo := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable",
 		os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME"))
 
-	db, err := sql.Open("postgres", dbinfo)
+	dbconn, err := sql.Open("postgres", dbinfo)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
+	defer dbconn.Close()
 
 	// routes
 	router := httprouter.New()
-	router.GET("/libraries", LibrariesHandler(db))
-	router.GET("/libraries/:id", LibraryHandler(db))
+	router.GET("/libraries", LibrariesHandler(dbconn))
+	router.GET("/libraries/:id", LibraryHandler(dbconn))
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
